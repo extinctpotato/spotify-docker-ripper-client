@@ -1,0 +1,94 @@
+import json
+from prettytable import PrettyTable
+from wimund.client import WimundClient
+from pygments import highlight, lexers, formatters
+
+def pretty_list_of_dicts(json):
+    ptable = PrettyTable()
+    ptable.field_names = json[0].keys()
+
+    for i in json:
+        ptable.add_row(i.values())
+
+    print(ptable)
+
+class CLI:
+    def __init__(self, url="http://localhost:9000", user=None, password=None):
+        self.client = WimundClient(url, user, password)
+
+    def status(self):
+        j = self.client.status()
+        jj = json.dumps(j, sort_keys=True, indent=4)
+        colorful_json = highlight(jj, lexers.JsonLexer(), formatters.TerminalFormatter())
+        print(colorful_json)
+
+    def search(self, query, dispatch=False):
+        json = self.client.search(query)['results']
+        ptable = PrettyTable()
+
+        ptable.field_names = ['id', 'artist', 'title']
+
+        id = 0
+
+        for res in json:
+            artists = ", ".join(res['artists'])
+            values = [id, artists, res['title']]
+
+            ptable.add_row(values)
+
+            id += 1
+
+        print(ptable)
+
+        if not dispatch:
+            return None
+
+        picked = False
+
+        while not picked:
+            pick = input("Pick a track to dispatch. [0-{}] ".format(id-1))
+            try:
+                pick_int = int(pick)
+            except ValueError:
+                print("I don't want a string!")
+                pick_int = None
+            if pick_int in range(0, id):
+                picked = True
+
+        print("Dispatching track_id: {}...".format(json[pick_int]['track_id']))
+        response = self.client.dispatch_track(json[pick_int]['track_id'])
+        print("Job ID: {}".format(response.get('job')))
+        print("Message: {}".format(response.get('msg')))
+
+    def list_tracks(self, album=False, download=False):
+        json = self.client.list_tracks()
+        json_tracks = json['tracks']
+        json_tracks_strip = json_tracks
+        ptable = PrettyTable()
+
+        for i in range(len(json_tracks_strip)):
+            del json_tracks_strip[i]['file']
+            del json_tracks_strip[i]['track_id']
+
+        print("Total tracks in storage: {}".format(json['count']))
+
+        field_names = ['id', 'artist', 'title']
+        if album:
+            field_names.append('album')
+        field_names.append('size')
+
+        ptable.field_names = field_names
+
+        id = 0
+
+        for i in json_tracks_strip:
+            values = [id, i['artist'], i['title']]
+            if album:
+                values.append(i['album'])
+            values.append(i['size_mb'])
+
+            ptable.add_row(values)
+
+            id += 1
+
+        print(ptable)
