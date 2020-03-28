@@ -18,12 +18,30 @@ class WimundClient:
         r = requests.get(url, auth=self.auth)
         return r.json()
 
+    def list_logs(self):
+        url = urljoin(self.url, "list/logs")
+        r = requests.get(url, auth=self.auth)
+        return r.json()
+
+    def spotify_start(self):
+        url = urljoin(self.url, "spotify/start")
+        r = requests.post(url, auth=self.auth)
+        return r.json()
+
+    def spotify_stop(self):
+        url = urljoin(self.url, "spotify/stop")
+        r = requests.post(url, auth=self.auth)
+        return r.json()
+
     def status(self):
         url = urljoin(self.url, "status")
         r = requests.get(url, auth=self.auth)
         return r.json()
 
-    def search(self, query):
+    def search(self, query, full=False):
         url = urljoin(self.url, "sapi/search")
-        r = requests.get(url, auth=self.auth, params={"q":query})
+        params = {"q":query}
+        if full:
+            params.update({"full":"true"})
+        r = requests.get(url, auth=self.auth, params=params)
         return r.json()

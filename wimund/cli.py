@@ -18,19 +18,27 @@ class CLI:
 
     def status(self):
         j = self.client.status()
-        jj = json.dumps(j, sort_keys=True, indent=4)
+        jj = json.dumps(j, ensure_ascii=False, sort_keys=True, indent=4)
         colorful_json = highlight(jj, lexers.JsonLexer(), formatters.TerminalFormatter())
         print(colorful_json)
 
-    def search(self, query, dispatch=False):
-        json = self.client.search(query)['results']
+    def search(self, query, dispatch=False, full=False):
+        if full:
+            j = self.client.search(query, full=True)
+            jj = json.dumps(j, ensure_ascii=False, sort_keys=True, indent=4)
+            colorful_json = highlight(jj, lexers.JsonLexer(), formatters.TerminalFormatter())
+            print(colorful_json)
+            return None
+        else:
+            j = self.client.search(query, full=True)['results']
+
         ptable = PrettyTable()
 
         ptable.field_names = ['id', 'artist', 'title']
 
         id = 0
 
-        for res in json:
+        for res in j:
             artists = ", ".join(res['artists'])
             values = [id, artists, res['title']]
 
@@ -59,6 +67,22 @@ class CLI:
         response = self.client.dispatch_track(json[pick_int]['track_id'])
         print("Job ID: {}".format(response.get('job')))
         print("Message: {}".format(response.get('msg')))
+
+    def spotifyctl(self, operation):
+        if operation == 'start':
+            print("Starting Spotify...")
+            resp = self.client.spotify_start()
+            print("Response: {}".format(resp.get('msg')))
+        elif operation == 'stop':
+            print("Stopping Spotify...")
+            resp = self.client.spotify_stop()
+            print("Response: {}".format(resp.get('msg')))
+        else:
+            print("Unknown operation.")
+
+    def list_logs(self):
+        json = self.client.list_logs()
+        pretty_list_of_dicts(json['logs'])
 
     def list_tracks(self, album=False, download=False):
         json = self.client.list_tracks()

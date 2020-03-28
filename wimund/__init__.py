@@ -20,11 +20,22 @@ def status_func(arg):
 
 def search_func(arg):
     c = CLI(*CLI_ARGS)
-    c.search(arg.query, dispatch=True)
+    if arg.full:
+        c.search(arg.query, dispatch=False, full=True)
+    else:
+        c.search(arg.query, dispatch=True)
+
+def list_logs_func(arg):
+    c = CLI(*CLI_ARGS)
+    c.list_logs()
 
 def list_tracks_func(arg):
     c = CLI(*CLI_ARGS)
     c.list_tracks()
+
+def spotify_func(arg):
+    c = CLI(*CLI_ARGS)
+    c.spotifyctl(arg.operation)
 
 def get_parser():
     parser = argparse.ArgumentParser()
@@ -32,6 +43,7 @@ def get_parser():
 
     search = subparsers.add_parser("search")
     search.add_argument("query", type=str)
+    search.add_argument("--full", action="store_true")
     search.set_defaults(func=search_func)
 
     tracks = subparsers.add_parser("tracks")
@@ -39,6 +51,13 @@ def get_parser():
 
     status = subparsers.add_parser("status")
     status.set_defaults(func=status_func)
+
+    logs = subparsers.add_parser("logs")
+    logs.set_defaults(func=list_logs_func)
+
+    spotify = subparsers.add_parser("spotify")
+    spotify.add_argument("operation", type=str)
+    spotify.set_defaults(func=spotify_func)
 
     return parser
 
