@@ -14,12 +14,12 @@ class WimundClient:
         return r.json()
 
     def list_tracks(self):
-        url = urljoin(self.url, "list/tracks")
+        url = urljoin(self.url, "track")
         r = requests.get(url, auth=self.auth)
         return r.json()
 
     def list_logs(self):
-        url = urljoin(self.url, "list/logs")
+        url = urljoin(self.url, "log")
         r = requests.get(url, auth=self.auth)
         return r.json()
 
@@ -32,6 +32,11 @@ class WimundClient:
         url = urljoin(self.url, "spotify/stop")
         r = requests.post(url, auth=self.auth)
         return r.json()
+
+    def get_log(self, logname):
+        url = urljoin(self.url, "log/{}".format(logname))
+        r = requests.get(url, auth=self.auth)
+        return r.content.decode()
 
     def status(self):
         url = urljoin(self.url, "status")

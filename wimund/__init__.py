@@ -27,7 +27,7 @@ def search_func(arg):
 
 def list_logs_func(arg):
     c = CLI(*CLI_ARGS)
-    c.list_logs()
+    c.list_logs(True)
 
 def list_tracks_func(arg):
     c = CLI(*CLI_ARGS)
@@ -36,6 +36,10 @@ def list_tracks_func(arg):
 def spotify_func(arg):
     c = CLI(*CLI_ARGS)
     c.spotifyctl(arg.operation)
+
+def test_func(arg):
+    c = CLI(*CLI_ARGS)
+    c.test()
 
 def get_parser():
     parser = argparse.ArgumentParser()
@@ -58,6 +62,9 @@ def get_parser():
     spotify = subparsers.add_parser("spotify")
     spotify.add_argument("operation", type=str)
     spotify.set_defaults(func=spotify_func)
+
+    test = subparsers.add_parser("test")
+    test.set_defaults(func=test_func)
 
     return parser
 

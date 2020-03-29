@@ -3,18 +3,34 @@ from prettytable import PrettyTable
 from wimund.client import WimundClient
 from pygments import highlight, lexers, formatters
 
-def pretty_list_of_dicts(json):
+def pretty_list_of_dicts(json, numbered=False):
     ptable = PrettyTable()
-    ptable.field_names = json[0].keys()
+    if numbered:
+        ptable.field_names = ['id'] + list(json[0].keys())
+        id = 0
+    else:
+        ptable.field_names = json[0].keys()
+
 
     for i in json:
-        ptable.add_row(i.values())
+        if numbered:
+            values = [id] + list(i.values())
+            id += 1 
+        else:
+            values = list(i.values())
+        ptable.add_row(values)
 
     print(ptable)
 
 class CLI:
     def __init__(self, url="http://localhost:9000", user=None, password=None):
         self.client = WimundClient(url, user, password)
+
+    def test(self):
+        j = self.client.dispatch_track("test")
+        jj = json.dumps(j, ensure_ascii=False, sort_keys=True, indent=4)
+        colorful_json = highlight(jj, lexers.JsonLexer(), formatters.TerminalFormatter())
+        print(colorful_json)
 
     def status(self):
         j = self.client.status()
@@ -30,7 +46,7 @@ class CLI:
             print(colorful_json)
             return None
         else:
-            j = self.client.search(query, full=True)['results']
+            j = self.client.search(query, full=False)['results']
 
         ptable = PrettyTable()
 
@@ -63,8 +79,8 @@ class CLI:
             if pick_int in range(0, id):
                 picked = True
 
-        print("Dispatching track_id: {}...".format(json[pick_int]['track_id']))
-        response = self.client.dispatch_track(json[pick_int]['track_id'])
+        print("Dispatching track_id: {}...".format(j[pick_int]['track_id']))
+        response = self.client.dispatch_track(j[pick_int]['track_id'])
         print("Job ID: {}".format(response.get('job')))
         print("Message: {}".format(response.get('msg')))
 
@@ -80,9 +96,33 @@ class CLI:
         else:
             print("Unknown operation.")
 
-    def list_logs(self):
+    def list_logs(self, download=False):
         json = self.client.list_logs()
-        pretty_list_of_dicts(json['logs'])
+        count = len(json)-1
+        
+        if not download:
+            pretty_list_of_dicts(json['logs'])
+            return None
+        else:
+            pretty_list_of_dicts(json['logs'], True)
+
+            picked = False
+
+            while not picked:
+                pick = input("Pick a log file to show. [0-{}] ".format(count))
+                try:
+                    pick_int = int(pick)
+                except ValueError:
+                    print("I don't want a string!")
+                    pick_int = None
+                if pick_int in range(0, len(json)):
+                    picked = True
+
+            print("Showing {}".format(json['logs'][picked]['file']))
+            log_content = self.client.get_log(json['logs'][pick_int]['file'])
+            print(log_content)
+
+
 
     def list_tracks(self, album=False, download=False):
         json = self.client.list_tracks()
