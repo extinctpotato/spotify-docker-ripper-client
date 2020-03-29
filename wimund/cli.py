@@ -98,7 +98,7 @@ class CLI:
 
     def list_logs(self, download=False):
         json = self.client.list_logs()
-        count = len(json)-1
+        count = json['count']-1
         
         if not download:
             pretty_list_of_dicts(json['logs'])
@@ -109,7 +109,12 @@ class CLI:
             picked = False
 
             while not picked:
-                pick = input("Pick a log file to show. [0-{}] ".format(count))
+                if count > 0:
+                    pick_msg = "Pick a log file to show. [0-{}] ".format(count)
+                else:
+                    pick_msg = "Pick a log file to show. Not much of a choice! [0] "
+
+                pick = input(pick_msg)
                 try:
                     pick_int = int(pick)
                 except ValueError:
@@ -118,7 +123,7 @@ class CLI:
                 if pick_int in range(0, len(json)):
                     picked = True
 
-            print("Showing {}".format(json['logs'][picked]['file']))
+            print("Showing {}".format(json['logs'][pick_int]['file']))
             log_content = self.client.get_log(json['logs'][pick_int]['file'])
             print(log_content)
 
