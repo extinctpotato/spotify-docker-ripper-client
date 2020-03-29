@@ -98,6 +98,10 @@ class CLI:
 
     def list_logs(self, download=False):
         json = self.client.list_logs()
+        if json['count'] == 0:
+            print("No logs to show!")
+            return None
+
         count = json['count']-1
         
         if not download:
@@ -131,6 +135,9 @@ class CLI:
 
     def list_tracks(self, album=False, download=False):
         json = self.client.list_tracks()
+        if json['count'] == 0:
+            print("No tracks to show!")
+            return None
         json_tracks = json['tracks']
         json_tracks_strip = json_tracks
         ptable = PrettyTable()
