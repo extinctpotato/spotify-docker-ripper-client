@@ -130,7 +130,7 @@ class CLI:
                 except ValueError:
                     print("I don't want a string!")
                     pick_int = None
-                if pick_int in range(0, len(json)):
+                if pick_int in range(0, json['count']):
                     picked = True
 
             print("Showing {}".format(json['logs'][pick_int]['file']))
