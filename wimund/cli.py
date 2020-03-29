@@ -38,6 +38,12 @@ class CLI:
         colorful_json = highlight(jj, lexers.JsonLexer(), formatters.TerminalFormatter())
         print(colorful_json)
 
+    def export_all(self):
+        j = self.client.export_all()
+        jj = json.dumps(j, ensure_ascii=False, sort_keys=True, indent=4)
+        colorful_json = highlight(jj, lexers.JsonLexer(), formatters.TerminalFormatter())
+        print(colorful_json)
+
     def search(self, query, dispatch=False, full=False):
         if full:
             j = self.client.search(query, full=True)

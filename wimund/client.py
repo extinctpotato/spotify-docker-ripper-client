@@ -33,6 +33,11 @@ class WimundClient:
         r = requests.post(url, auth=self.auth)
         return r.json()
 
+    def export_all(self):
+        url = urljoin(self.url, "export")
+        r = requests.post(url, auth=self.auth)
+        return r.json()
+
     def get_log(self, logname):
         url = urljoin(self.url, "log/{}".format(logname))
         r = requests.get(url, auth=self.auth)

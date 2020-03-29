@@ -41,6 +41,10 @@ def test_func(arg):
     c = CLI(*CLI_ARGS)
     c.test()
 
+def export_func(arg):
+    c = CLI(*CLI_ARGS)
+    c.export_all()
+
 def get_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -62,6 +66,9 @@ def get_parser():
     spotify = subparsers.add_parser("spotify")
     spotify.add_argument("operation", type=str)
     spotify.set_defaults(func=spotify_func)
+
+    export = subparsers.add_parser("export")
+    export.set_defaults(func=export_func)
 
     test = subparsers.add_parser("test")
     test.set_defaults(func=test_func)
