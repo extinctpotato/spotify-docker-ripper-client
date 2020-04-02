@@ -22,6 +22,27 @@ def pretty_list_of_dicts(json, numbered=False):
 
     print(ptable)
 
+def ask_for_int(message, max_value):
+    picked = False
+
+    while not picked:
+        if max_value > 0:
+            pick_msg = "{}. [0-{}] ".format(message, max_value)
+        else:
+            pick_msg = "{}. Not much of a choice! [0] "
+
+        pick = input(pick_msg)
+
+        try:
+            pick_int = int(pick)
+        except ValueError:
+            print("I don't want a string!")
+            pick_int = None
+        if pick_int in range(0, max_value+1):
+            picked = True
+
+    return pick_int
+
 class CLI:
     def __init__(self, url="http://localhost:9000", user=None, password=None):
         self.client = WimundClient(url, user, password)
@@ -73,17 +94,7 @@ class CLI:
         if not dispatch:
             return None
 
-        picked = False
-
-        while not picked:
-            pick = input("Pick a track to dispatch. [0-{}] ".format(id-1))
-            try:
-                pick_int = int(pick)
-            except ValueError:
-                print("I don't want a string!")
-                pick_int = None
-            if pick_int in range(0, id):
-                picked = True
+        pick_int = ask_for_int("Pick a track to dispatch", id-1) 
 
         print("Dispatching track_id: {}...".format(j[pick_int]['track_id']))
         response = self.client.dispatch_track(j[pick_int]['track_id'])
@@ -108,30 +119,13 @@ class CLI:
             print("No logs to show!")
             return None
 
-        count = json['count']-1
-        
         if not download:
             pretty_list_of_dicts(json['logs'])
             return None
         else:
             pretty_list_of_dicts(json['logs'], True)
 
-            picked = False
-
-            while not picked:
-                if count > 0:
-                    pick_msg = "Pick a log file to show. [0-{}] ".format(count)
-                else:
-                    pick_msg = "Pick a log file to show. Not much of a choice! [0] "
-
-                pick = input(pick_msg)
-                try:
-                    pick_int = int(pick)
-                except ValueError:
-                    print("I don't want a string!")
-                    pick_int = None
-                if pick_int in range(0, json['count']):
-                    picked = True
+            pick_int = ask_for_int("Pick a log file to show", int(json['count'])-1)
 
             print("Showing {}".format(json['logs'][pick_int]['file']))
             log_content = self.client.get_log(json['logs'][pick_int]['file'])
