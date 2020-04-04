@@ -38,22 +38,20 @@ class WimundClient:
                 progress = tqdm(total=size, initial=0, unit='B', unit_scale=True, ascii=True, ncols=120, file=sys.stdout)
             else:
                 player = subprocess.Popen(
-                        "ffplay -i -nodisp /dev/stdin", 
+                        "ffplay -i -nodisp -hide_banner -loglevel 32 /dev/stdin", 
                         shell=True, 
                         stdin=subprocess.PIPE, 
                         stdout=subprocess.DEVNULL, 
-                        stderr=subprocess.DEVNULL
                         )
 
-            with open(filename, "wb") as f:
+            if only_play:
                 for chunk in r.iter_content(chunk_size=chunk_size):
-                    if not only_play:
-                        f.write(chunk)
-                    else:
-                        player.stdin.write(chunk)
+                    player.stdin.write(chunk)
+            else:
+                with open(filename, "wb") as f:
+                    f.write(chunk)
                     if not quiet:
                         progress.update(sys.getsizeof(chunk))
-
 
     def list_logs(self):
         url = urljoin(self.url, "log")
