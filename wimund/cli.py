@@ -92,6 +92,10 @@ class CLI:
 
         id = 0
 
+        if len(j) == 0:
+            print("No results!")
+            return None
+
         for res in j:
             artists = ", ".join(res['artists'])
             values = [id, artists, res['title']]
