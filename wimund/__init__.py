@@ -23,7 +23,10 @@ def search_func(arg):
     if arg.full:
         c.search(arg.query, dispatch=False, full=True)
     else:
-        c.search(arg.query, dispatch=True)
+        if arg.no_album:
+            c.search(arg.query, dispatch=True, album=False)
+        else:
+            c.search(arg.query, dispatch=True, album=True)
 
 def list_logs_func(arg):
     c = CLI(*CLI_ARGS)
@@ -57,6 +60,7 @@ def get_parser():
     search = subparsers.add_parser("search")
     search.add_argument("query", type=str)
     search.add_argument("--full", action="store_true")
+    search.add_argument("--no-album", action="store_true")
     search.set_defaults(func=search_func)
 
     tracks = subparsers.add_parser("tracks")

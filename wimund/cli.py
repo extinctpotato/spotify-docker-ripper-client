@@ -30,7 +30,7 @@ def ask_for_int(message, max_value):
         if max_value > 0:
             pick_msg = "{}. [0-{}] ".format(message, max_value)
         else:
-            pick_msg = "{}. Not much of a choice! [0] "
+            pick_msg = "{}. Not much of a choice! [0] ".format(message)
 
         pick = input(pick_msg)
 
@@ -71,7 +71,7 @@ class CLI:
         colorful_json = highlight(jj, lexers.JsonLexer(), formatters.TerminalFormatter())
         print(colorful_json)
 
-    def search(self, query, dispatch=False, full=False):
+    def search(self, query, dispatch=False, full=False, album=True):
         if full:
             j = self.client.search(query, full=True)
             jj = json.dumps(j, ensure_ascii=False, sort_keys=True, indent=4)
@@ -83,13 +83,24 @@ class CLI:
 
         ptable = PrettyTable()
 
-        ptable.field_names = ['id', 'artist', 'title']
+        field_names = ['id', 'artist', 'title']
+
+        if album:
+            field_names.append('album')
+
+        ptable.field_names = field_names
 
         id = 0
 
         for res in j:
             artists = ", ".join(res['artists'])
             values = [id, artists, res['title']]
+
+            if album:
+                if res['album'] == res['title']:
+                    values.append("<see title>")
+                else:
+                    values.append(res['album'])
 
             ptable.add_row(values)
 
