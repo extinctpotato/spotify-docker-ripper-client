@@ -18,6 +18,11 @@ class WimundClient:
         r = requests.get(url, auth=self.auth)
         return r.json()
 
+    def delete_track(self, track_id):
+        url = urljoin(self.url, "track/{}".format(track_id))
+        r = requests.delete(url, auth=self.auth)
+        return r.json()
+
     def list_logs(self):
         url = urljoin(self.url, "log")
         r = requests.get(url, auth=self.auth)

@@ -29,9 +29,14 @@ def list_logs_func(arg):
     c = CLI(*CLI_ARGS)
     c.list_logs(True)
 
-def list_tracks_func(arg):
+def tracks_func(arg):
     c = CLI(*CLI_ARGS)
-    c.list_tracks()
+    if arg.op == 'list':
+        c.list_tracks()
+    elif arg.op == 'delete':
+        c.list_tracks(delete=True)
+    elif arg.op == 'download':
+        c.list_tracks(download=True)
 
 def spotify_func(arg):
     c = CLI(*CLI_ARGS)
@@ -55,7 +60,8 @@ def get_parser():
     search.set_defaults(func=search_func)
 
     tracks = subparsers.add_parser("tracks")
-    tracks.set_defaults(func=list_tracks_func)
+    tracks.set_defaults(func=tracks_func)
+    tracks.add_argument("--op", "--operation", choices=["list", "download", "delete"], default="list")
 
     status = subparsers.add_parser("status")
     status.set_defaults(func=status_func)

@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from prettytable import PrettyTable
 from wimund.client import WimundClient
 from pygments import highlight, lexers, formatters
@@ -42,6 +43,11 @@ def ask_for_int(message, max_value):
             picked = True
 
     return pick_int
+
+def colorful_json(json_dict):
+        jj = json.dumps(json_dict, ensure_ascii=False, sort_keys=True, indent=4)
+        colorful_json_obj = highlight(jj, lexers.JsonLexer(), formatters.TerminalFormatter())
+        return colorful_json_obj
 
 class CLI:
     def __init__(self, url="http://localhost:9000", user=None, password=None):
@@ -133,13 +139,13 @@ class CLI:
 
 
 
-    def list_tracks(self, album=False, download=False):
+    def list_tracks(self, album=False, download=False, delete=False):
         json = self.client.list_tracks()
         if json['count'] == 0:
             print("No tracks to show!")
             return None
         json_tracks = json['tracks']
-        json_tracks_strip = json_tracks
+        json_tracks_strip = deepcopy(json_tracks)
         ptable = PrettyTable()
 
         for i in range(len(json_tracks_strip)):
@@ -168,3 +174,12 @@ class CLI:
             id += 1
 
         print(ptable)
+
+        if download:
+            choice = ask_for_int("Pick a track to download", id-1)
+            print(choice)
+        elif delete:
+            choice = ask_for_int("Pick a track to delete", id-1)
+            r = self.client.delete_track(json_tracks[choice]['track_id'])
+            print(colorful_json(r))
+
