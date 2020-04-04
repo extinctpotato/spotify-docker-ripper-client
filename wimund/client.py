@@ -1,4 +1,4 @@
-import requests, sys
+import requests, sys, subprocess
 from tqdm import tqdm
 from urllib.parse import urljoin
 from prettytable import PrettyTable
@@ -24,7 +24,7 @@ class WimundClient:
         r = requests.delete(url, auth=self.auth)
         return r.json()
 
-    def download_track(self, track_id, filename=None, quiet=False, chunk_size=1024*1024):
+    def download_track(self, track_id, filename=None, quiet=False, only_play=False, chunk_size=1024*1024):
         url = urljoin(self.url, "track/{}".format(track_id))
 
         with requests.get(url, stream=True, auth=self.auth, headers={'Accept-Encoding': None}) as r:
@@ -33,12 +33,24 @@ class WimundClient:
 
             r.raise_for_status()
 
-            size = int(r.headers['Content-Length'])
-            progress = tqdm(total=size, initial=0, unit='B', unit_scale=True, ascii=True, ncols=120, file=sys.stdout)
+            if not only_play:
+                size = int(r.headers['Content-Length'])
+                progress = tqdm(total=size, initial=0, unit='B', unit_scale=True, ascii=True, ncols=120, file=sys.stdout)
+            else:
+                player = subprocess.Popen(
+                        "ffplay -i -nodisp /dev/stdin", 
+                        shell=True, 
+                        stdin=subprocess.PIPE, 
+                        stdout=subprocess.DEVNULL, 
+                        stderr=subprocess.DEVNULL
+                        )
 
             with open(filename, "wb") as f:
                 for chunk in r.iter_content(chunk_size=chunk_size):
-                    f.write(chunk)
+                    if not only_play:
+                        f.write(chunk)
+                    else:
+                        player.stdin.write(chunk)
                     if not quiet:
                         progress.update(sys.getsizeof(chunk))
 

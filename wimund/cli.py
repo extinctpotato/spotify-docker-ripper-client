@@ -154,7 +154,7 @@ class CLI:
 
 
 
-    def list_tracks(self, album=False, download=False, delete=False):
+    def list_tracks(self, album=False, download=False, delete=False, play=False):
         json = self.client.list_tracks()
         if json['count'] == 0:
             print("No tracks to show!")
@@ -197,4 +197,6 @@ class CLI:
             choice = ask_for_int("Pick a track to delete", id-1)
             r = self.client.delete_track(json_tracks[choice]['track_id'])
             print(colorful_json(r))
-
+        elif play:
+            choice = ask_for_int("Pick a track to play", id-1)
+            self.client.download_track(json_tracks[choice]['track_id'], only_play=True)
