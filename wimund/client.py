@@ -1,4 +1,5 @@
-import requests
+import requests, sys
+from tqdm import tqdm
 from urllib.parse import urljoin
 from prettytable import PrettyTable
 from requests.auth import HTTPBasicAuth
@@ -22,6 +23,25 @@ class WimundClient:
         url = urljoin(self.url, "track/{}".format(track_id))
         r = requests.delete(url, auth=self.auth)
         return r.json()
+
+    def download_track(self, track_id, filename=None, quiet=False, chunk_size=1024*1024):
+        url = urljoin(self.url, "track/{}".format(track_id))
+
+        with requests.get(url, stream=True, auth=self.auth, headers={'Accept-Encoding': None}) as r:
+            if filename is None:
+                filename = "{}.ogg".format(track_id.split(":")[2])
+
+            r.raise_for_status()
+
+            size = int(r.headers['Content-Length'])
+            progress = tqdm(total=size, initial=0, unit='B', unit_scale=True, ascii=True, ncols=120, file=sys.stdout)
+
+            with open(filename, "wb") as f:
+                for chunk in r.iter_content(chunk_size=chunk_size):
+                    f.write(chunk)
+                    if not quiet:
+                        progress.update(sys.getsizeof(chunk))
+
 
     def list_logs(self):
         url = urljoin(self.url, "log")

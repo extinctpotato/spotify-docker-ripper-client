@@ -188,7 +188,7 @@ class CLI:
 
         if download:
             choice = ask_for_int("Pick a track to download", id-1)
-            print(choice)
+            self.client.download_track(json_tracks[choice]['track_id'])
         elif delete:
             choice = ask_for_int("Pick a track to delete", id-1)
             r = self.client.delete_track(json_tracks[choice]['track_id'])
