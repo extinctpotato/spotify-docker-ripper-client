@@ -55,6 +55,10 @@ def export_func(arg):
     c = CLI(*CLI_ARGS)
     c.export_all()
 
+def clipper_func(arg):
+    c = CLI(*CLI_ARGS)
+    c.clipper()
+
 def get_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -84,6 +88,9 @@ def get_parser():
 
     test = subparsers.add_parser("test")
     test.set_defaults(func=test_func)
+
+    clipper = subparsers.add_parser("clipper")
+    clipper.set_defaults(func=clipper_func)
 
     return parser
 

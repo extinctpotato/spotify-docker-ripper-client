@@ -1,4 +1,6 @@
-import json
+import json, psutil
+from time import sleep
+from pyperclip import paste
 from copy import deepcopy
 from prettytable import PrettyTable
 from wimund.client import WimundClient
@@ -22,6 +24,23 @@ def pretty_list_of_dicts(json, numbered=False):
         ptable.add_row(values)
 
     print(ptable)
+
+def is_spotify_running():
+    if "spotify" in (p.name() for p in psutil.process_iter()):
+        return True
+    else:
+        return False
+
+def uri_split(uri):
+    return uri.split(":")
+
+def is_track_uri(uri):
+    s = uri_split(uri)
+    if not s[0] == "spotify":
+        return False
+    if not s[1] == "track":
+        return False
+    return True
 
 def ask_for_int(message, max_value):
     picked = False
@@ -200,3 +219,33 @@ class CLI:
         elif play:
             choice = ask_for_int("Pick a track to play", id-1)
             self.client.download_track(json_tracks[choice]['track_id'], only_play=True)
+
+    def clipper(self):
+        distinct = []
+        collect = True
+
+        init_wait_count = 0
+        
+        while not is_spotify_running():
+            if init_wait_count == 1:
+                print("Please start Spotify.")
+            init_wait_count += 1
+
+        print("I will steal tracks URIs from your clipboard.")
+
+        while collect:
+            stolen = paste()
+            if not stolen in distinct and is_track_uri(stolen):
+                distinct.append(stolen)
+                print(f'Stolen: {stolen}')
+            if not is_spotify_running():
+                print("Spotify has been closed, commencing dispatching.")
+                collect = False
+            sleep(1)
+
+        for track in distinct:
+            print('-----------------------------------------------')
+            print("Dispatching: {}".format(track))
+            response = self.client.dispatch_track(track)
+            print("Job ID: {}".format(response.get('job')))
+            print("Message: {}".format(response.get('msg')))
