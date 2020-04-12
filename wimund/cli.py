@@ -1,4 +1,4 @@
-import json, psutil
+import json
 from time import sleep
 from pyperclip import paste
 from copy import deepcopy
@@ -221,6 +221,8 @@ class CLI:
             self.client.download_track(json_tracks[choice]['track_id'], only_play=True)
 
     def clipper(self):
+        import psutil
+
         distinct = []
         collect = True
 
