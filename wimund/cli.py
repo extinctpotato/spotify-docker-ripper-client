@@ -1,4 +1,4 @@
-import json
+import json, psutil
 from time import sleep
 from pyperclip import paste
 from copy import deepcopy
