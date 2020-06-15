@@ -1,4 +1,4 @@
-import json, psutil
+import json
 from time import sleep
 from pyperclip import paste
 from copy import deepcopy
@@ -25,11 +25,7 @@ def pretty_list_of_dicts(json, numbered=False):
 
     print(ptable)
 
-def is_spotify_running():
-    if "spotify" in (p.name() for p in psutil.process_iter()):
-        return True
-    else:
-        return False
+
 
 def uri_split(uri):
     return uri.split(":")
@@ -223,12 +219,19 @@ class CLI:
     def clipper(self):
         import psutil
 
+        def _is_spotify_running():
+            import psutil
+            if "spotify" in (p.name() for p in psutil.process_iter()):
+                return True
+            else:
+                return False
+
         distinct = []
         collect = True
 
         init_wait_count = 0
         
-        while not is_spotify_running():
+        while not _is_spotify_running():
             if init_wait_count == 1:
                 print("Please start Spotify.")
             init_wait_count += 1
@@ -240,7 +243,7 @@ class CLI:
             if not stolen in distinct and is_track_uri(stolen):
                 distinct.append(stolen)
                 print(f'Stolen: {stolen}')
-            if not is_spotify_running():
+            if not _is_spotify_running():
                 print("Spotify has been closed, commencing dispatching.")
                 collect = False
             sleep(1)
